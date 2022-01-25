@@ -14,6 +14,7 @@ library(dplyr)
 library(tidyverse)
 library(ggpubr)
 library(wordcloud)
+library(RColorBrewer)
 
 
 # thematic_shiny(font = "auto")
@@ -38,11 +39,11 @@ twitch_overall <- Twitch_global_data_1 %>%
                                 Month == 10 ~ "October",
                                 Month == 11 ~ "November",
                                 Month == 12 ~ "December"
-                                ))
+  ))
 
 #View(twitch_overall)
 # dropdown na to jakie dane chce wysietlic, 
-# miesaice z numerków zamien na wpisane
+# miesaice z numerk?w zamien na wpisane
 
 #do 2
 Twitch_game_data <- read_csv("Twitch_game_data.csv", 
@@ -72,7 +73,9 @@ Twitch_game_yearly_data <- Twitch_game_yearly_data %>%
     avg_viewer_ratio_sum = mean(Avg_viewer_ratio)
   )
 
+View(Twitch_game_yearly_data)
 
+twitch_cloud <- Twitch_game_yearly_data
 
 
 # Define UI for application that draws a histogram
@@ -114,7 +117,7 @@ ui <- fluidPage(
              ),
              
              
-             ),
+    ),
     
     
     tabPanel("Szczegolowe",
@@ -144,12 +147,12 @@ ui <- fluidPage(
                ),
                
              )
-    
+             
              
              
              
     ),
-
+    
     
     
     tabPanel("Bumbelki",
@@ -169,7 +172,7 @@ ui <- fluidPage(
                  fluidRow(
                    column(6,
                           plotOutput("distPlot3_1"),
-                          ),
+                   ),
                    column(6,
                           plotOutput("distPlot3_2"),
                    )
@@ -189,20 +192,43 @@ ui <- fluidPage(
                    column(6,
                           plotOutput("distPlot3_6"),
                    )
+                 ),
+                 fluidRow(
+                   column(6,
+                          plotOutput("distPlot3_7"),
+                   ),
+                   column(6,
+                          plotOutput("distPlot3_8"),
+                   )
                  )
-                 
-                 
-                 
-                 
-                 
                ),
                
              )
              
     ),
     
+    tabPanel("Population",
+             sidebarLayout(
+               sidebarPanel(
+                 sliderInput("year4",
+                             "Year:",
+                             min = 2016,
+                             max = 2021,
+                             value = 2016),
 
-  
+               ),
+               
+               
+               mainPanel(
+                 plotOutput("distPlot4"),
+               ),
+               
+             )
+             
+    ),
+    
+    
+    
   )
 )
 
@@ -234,9 +260,9 @@ server <- function(input, output) {
     y_name <- input$stats
     
     ggplot(tw, aes(x=reorder(Month_name, Month), y=get(stats))) + geom_col(fill="#debb2f") + 
-      labs(title = "coś ", x = "Month", y = y_name)
+      labs(title = "co? ", x = "Month", y = y_name)
     
-
+    
     
   })
   
@@ -258,7 +284,7 @@ server <- function(input, output) {
     
     # bg = "#002B36", fg = "#EEE8D5", primary = "#2AA198" /////////// CBBF7A //////////#F4E87C
     # ggplot(Twitch_global_data_per_year, aes(x=reorder(Game, -get(stats2), y=get(stats2))) + geom_col(fill="#D1AD0A") +
-    #   labs(title = "Sumaryczna powierzchnia gruntów w poszczególnych województwach", x = "Game", y = stats2) +
+    #   labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Game", y = stats2) +
     #   theme(text = element_text(size = 14)))
     
     ggplot(Twitch_global_data_per_year, aes(x=reorder(Game, -get(stats2)), y=get(stats2))) + geom_col(fill="#debb2f") +
@@ -267,7 +293,7 @@ server <- function(input, output) {
     
     
     # ggplot(Twitch_global_data_per_year, aes_string(x="Game", y=stats)) + geom_col(fill="#debb2f") + 
-    #   labs(title = "Sumaryczna powierzchnia gruntów w poszczególnych województwach", x = "Województwo", y = "Powierzchnia [ha]")
+    #   labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Wojew?dztwo", y = "Powierzchnia [ha]")
     
     
   })
@@ -276,98 +302,140 @@ server <- function(input, output) {
   output$distPlot3_1 <- renderPlot({
     game3 <- input$game3
     
-    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)
+    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)%>% 
+      mutate(Year = as.numeric(Year))
     
-  
-    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=hours_watched_sum)) + geom_col(fill="#debb2f") +
-      labs(title = "Sumaryczna powierzchnia gruntów w poszczególnych województwach", x ="Year", y = "1")
+    
+    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=hours_watched_sum)) + 
+      geom_line(aes(group=1), color="#debb2f", size=1.5) +
+      geom_point(shape=21, fill="#debb2f", size=5) +
+      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x ="Year", y = "1")
   })
   
   output$distPlot3_2 <- renderPlot({
     game3 <- input$game3
     
-    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)
+    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)%>% 
+      mutate(Year = as.numeric(Year))
     
     
-    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=hours_streamed_sum)) + geom_col(fill="#debb2f") +
-      labs(title = "Sumaryczna powierzchnia gruntów w poszczególnych województwach", x = "Year", y = "2d")
+    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=hours_streamed_sum)) + 
+      geom_line(aes(group=1), color="#debb2f", size=1.5) +
+      geom_point(shape=21, fill="#debb2f", size=5) +
+      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Year", y = "2d")
   })
   
   output$distPlot3_3 <- renderPlot({
     game3 <- input$game3
     
-    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)
+    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)%>% 
+      mutate(Year = as.numeric(Year))
     
     
-    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=peak_viewers_max)) + geom_col(fill="#debb2f") +
-      labs(title = "Sumaryczna powierzchnia gruntów w poszczególnych województwach", x = "Year", y = "3")
+    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=peak_viewers_max)) + 
+      geom_line(aes(group=1), color="#debb2f", size=1.5) +
+      geom_point(shape=21, fill="#debb2f", size=5) +
+      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Year", y = "3")
   })
   
   
   output$distPlot3_4 <- renderPlot({
     game3 <- input$game3
     
-    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)
+    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)%>% 
+      mutate(Year = as.numeric(Year))
     
     
-    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=peak_channels_max)) + geom_col(fill="#debb2f") +
-      labs(title = "Sumaryczna powierzchnia gruntów w poszczególnych województwach", x = "Year", y = "4")
+    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=peak_channels_max)) + 
+      geom_line(aes(group=1), color="#debb2f", size=1.5) +
+      geom_point(shape=21, fill="#debb2f", size=5) +
+      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Year", y = "4")
   })
-      
+  
   output$distPlot3_5 <- renderPlot({
     game3 <- input$game3
     
-    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)
-    
-    
-    
-    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=streamers_sum)) + geom_col(fill="#debb2f") +
-      labs(title = "Sumaryczna powierzchnia gruntów w poszczególnych województwach", x = "Year", y = "5")
-  }) 
+    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)%>%
+      mutate(Year = as.numeric(Year))
 
+    
+    
+    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=streamers_sum)) +
+      geom_line(aes(group=1), color="#debb2f", size=1.5) +
+      geom_point(shape=21, fill="#debb2f", size=5) +
+      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Year", y = "5")
+  }) 
+  
   output$distPlot3_6 <- renderPlot({
     game3 <- input$game3
     
-    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)
+    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)%>%
+      mutate(Year = as.numeric(Year))
+
     
     
-    
-    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=avg_viewers_sum)) + geom_col(fill="#debb2f") +
-      labs(title = "Sumaryczna powierzchnia gruntów w poszczególnych województwach", x = "Year", y = "6")
+    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=avg_viewers_sum)) + 
+      geom_line(aes(group=1), color="#debb2f", size=1.5) +
+      geom_point(shape=21, fill="#debb2f", size=5) +
+      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Year", y = "6")
   }) 
   
-
+  
   output$distPlot3_7 <- renderPlot({
     game3 <- input$game3
     
-    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)
+    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)%>%
+      mutate(Year = as.numeric(Year))
+
     
     
-    
-    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=avg_channels_sum)) + geom_col(fill="#debb2f") +
-      labs(title = "Sumaryczna powierzchnia gruntów w poszczególnych województwach", x = "Year", y = "7")
+    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=avg_channels_sum)) + 
+      geom_line(aes(group=1), color="#debb2f", size=1.5) +
+      geom_point(shape=21, fill="#debb2f", size=5) +
+      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Year", y = "7")
   })
-   
+  
   output$distPlot3_8 <- renderPlot({
     game3 <- input$game3
+
+    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)%>%
+      mutate(Year = as.numeric(Year))
+
     
-    Twitch_game_yearly_data <- Twitch_game_yearly_data %>% subset(Game == game3)
     
-    
-    
-    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=avg_viewer_ratio_sum)) + geom_col(fill="#debb2f") +
-      labs(title = "Sumaryczna powierzchnia gruntów w poszczególnych województwach", x = "Year", y = "8")
+    ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=avg_viewer_ratio_sum)) + 
+      geom_line(aes(group=1), color="#debb2f", size=1.5) +
+      geom_point(shape=21, fill="#debb2f", size=5) +
+      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Year", y = "8")
   })
-
-    
-
-   
-
   
-    
-
   
+  mycloud <- repeatable(wordcloud)
+  
+  output$distPlot4 <- renderPlot({
+    year4 <- input$year4
 
+    twitch_cloud <- twitch_cloud %>% subset(Year == year4) %>% arrange(-hours_watched_sum) %>% head(30)
+    View(twitch_cloud)
+    mycloud(words = twitch_cloud$Game, freq = twitch_cloud$hours_watched_sum, colors=brewer.pal(8, "Dark2"))
+    #mycloud(words = Twitch_game_yearly_4$Game, freq = get(stats4), colors=brewer.pal(8, "Dark2"))
+    
+    #wordcloud(words = Twitch_game_yearly_4$Game, freq = Twitch_game_yearly_4$hours_watched_sum, colors=brewer.pal(8, "Dark2"))
+    
+    
+    
+  })
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 }
 
 # Run the application 
