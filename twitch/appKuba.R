@@ -381,7 +381,7 @@ server <- function(input, output) {
 
     twitch_cloud <- twitch_cloud %>% subset(Year == year4) %>% arrange(-hours_watched_sum) %>% head(30)
     # View(twitch_cloud)
-    mycloud(words = twitch_cloud$Game, freq = twitch_cloud$hours_watched_sum, colors=brewer.pal(8, "Dark2"))
+    mycloud(words = twitch_cloud$Game, freq = twitch_cloud$hours_watched_sum,random.order=FALSE, rot.per=0.35,   colors=brewer.pal(8, "Dark2"))
     
     
     
