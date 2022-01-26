@@ -42,8 +42,6 @@ twitch_overall <- Twitch_global_data_1 %>%
   ))
 
 #View(twitch_overall)
-# dropdown na to jakie dane chce wysietlic, 
-# miesaice z numerk?w zamien na wpisane
 
 #do 2
 Twitch_game_data <- read_csv("Twitch_game_data.csv", 
@@ -73,7 +71,7 @@ Twitch_game_yearly_data <- Twitch_game_yearly_data %>%
     avg_viewer_ratio_sum = mean(Avg_viewer_ratio)
   )
 
-View(Twitch_game_yearly_data)
+#View(Twitch_game_yearly_data)
 
 twitch_cloud <- Twitch_game_yearly_data
 
@@ -81,30 +79,28 @@ twitch_cloud <- Twitch_game_yearly_data
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   #adding theme
-  #theme = bslib::bs_theme(bootswatch = "darkly"),
   theme = bslib::bs_theme(
     bg = "#002B36", fg = "#EEE8D5", primary = "#2AA198",
-    # bslib also makes it easy to import CSS fonts
     base_font = bslib::font_google("Dongle"),
     font_scale = 2
   ),
   
   
   # Application title
-  titlePanel("Twitch Stats ;)"),
+  titlePanel("Twitch statistics"),
   
   tabsetPanel(
-    tabPanel("Zbiorecze",
+    tabPanel("Tab 1",
              
              # Sidebar with a slider input for number of bins 
              sidebarLayout(
                sidebarPanel(
                  sliderInput("bins",
-                             "Number of bins:",
+                             "Choose year:",
                              min = 2016,
                              max = 2021,
                              value = 2018),
-                 selectInput("stats", "Choose a stats to display:",
+                 selectInput("stats", "Choose parameter to display:",
                              choices = c("Hours_watched", "Avg_viewers", "Peak_viewers", "Streams", "Avg_channels", "Games_streamed"),
                  ),
                  
@@ -120,27 +116,23 @@ ui <- fluidPage(
     ),
     
     
-    tabPanel("Szczegolowe",
+    tabPanel("Tab 2",
              
              sidebarLayout(
                sidebarPanel(
                  sliderInput("year2",
-                             "Year:",
+                             "Choose year:",
                              min = 2016,
                              max = 2021,
                              value = 2016),
                  sliderInput("month2",
-                             "Month:",
+                             "Choose month:",
                              min = 1,
                              max = 12,
                              value = 1),
-                 selectInput("stats2", "Choose a stats to display:",
+                 selectInput("stats2", "Choose parameter to display:",
                              c("Hours_watched","Hours_Streamed", "Peak_viewers", "Peak_channels", "Streamers", "Avg_viewers", "Avg_channels", "Avg_viewer_ratio"),
                  ),
-                 #to idezie do 3 dzialki
-                 # selectInput("game", "Choose a game:",
-                 #             c("League of Legends","Counter-Strike: Global Offensive", "Dota 2", "Hearthstone", "Call of Duty: Black Ops III", "Grand Theft Auto V", "VALORANT", "Fortnite"),
-                 # ),
                ),
                mainPanel(
                  plotOutput("distPlot2"),
@@ -155,20 +147,15 @@ ui <- fluidPage(
     
     
     
-    tabPanel("Bumbelki",
+    tabPanel("Tab 3",
              sidebarLayout(
                sidebarPanel(
                  selectInput("game3", "Choose a game:",
                              c("League of Legends","Counter-Strike: Global Offensive", "Dota 2", "Hearthstone", "Call of Duty: Black Ops III", "Grand Theft Auto V", "VALORANT", "Fortnite"),
                  ),
-                 #to idezie do 3 dzialki
-                 # selectInput("game", "Choose a game:",
-                 #             c("League of Legends","Counter-Strike: Global Offensive", "Dota 2", "Hearthstone", "Call of Duty: Black Ops III", "Grand Theft Auto V", "VALORANT", "Fortnite"),
-                 # ),
                ),
                mainPanel(
                  
-                 #plotOutput("distPlot3"),
                  fluidRow(
                    column(6,
                           plotOutput("distPlot3_1"),
@@ -207,11 +194,11 @@ ui <- fluidPage(
              
     ),
     
-    tabPanel("Population",
+    tabPanel("Tab 4",
              sidebarLayout(
                sidebarPanel(
                  sliderInput("year4",
-                             "Year:",
+                             "Choose year:",
                              min = 2016,
                              max = 2021,
                              value = 2016),
@@ -220,7 +207,8 @@ ui <- fluidPage(
                
                
                mainPanel(
-                 plotOutput("distPlot4"),
+                 "Visualisation of most popular games (according to sum of hours watched per year)",
+                 plotOutput("distPlot4")
                ),
                
              )
@@ -238,21 +226,11 @@ server <- function(input, output) {
   
   thematic::thematic_shiny()
   
-  output$result <- renderText({
-    paste("You chose this stat", input$stats)
-  })
   
   
   output$distPlot <- renderPlot({
-    # generate bins based on input$bins from ui.R
-    # x    <- faithful[, 2]
-    # bins <- seq(min(x), max(x), length.out = input$bins)
     bins <- input$bins
     stats <- input$stats
-    # Twitch_global_data_per_year <- Twitch_global_data_1 %>% subset(year == bins)
-    
-    # draw the histogram with the specified number of bins
-    #hist(x, breaks = bins, col = 'darkgray', border = 'white')
     
     tw <- twitch_overall %>%
       subset(year == bins)
@@ -260,21 +238,16 @@ server <- function(input, output) {
     y_name <- input$stats
     
     ggplot(tw, aes(x=reorder(Month_name, Month), y=get(stats))) + geom_col(fill="#debb2f") + 
-      labs(title = "co? ", x = "Month", y = y_name)
+      labs(title = "General statistics for whole twitch", x = "Month", y = y_name)
     
     
     
   })
   
   output$distPlot2 <- renderPlot({
-    # generate bins based on input$bins from ui.R
-    # x    <- faithful[, 2]
-    # bins <- seq(min(x), max(x), length.out = input$bins)
     year2 <- input$year2
     month2 <- input$month2
     stats2 <- input$stats2
-    
-    #Twitch_global_data_per_year <- Twitch_game_data %>% subset(Year == year2) %>% subset(Month == month2) %>% subset(Rank < 6)
     
     Twitch_global_data_per_year <- Twitch_game_data %>% subset(Year == year2) %>% subset(Month == month2)
     #View(Twitch_global_data_per_year)
@@ -282,18 +255,9 @@ server <- function(input, output) {
     #View(Twitch_global_data_per_year)
     
     
-    # bg = "#002B36", fg = "#EEE8D5", primary = "#2AA198" /////////// CBBF7A //////////#F4E87C
-    # ggplot(Twitch_global_data_per_year, aes(x=reorder(Game, -get(stats2), y=get(stats2))) + geom_col(fill="#D1AD0A") +
-    #   labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Game", y = stats2) +
-    #   theme(text = element_text(size = 14)))
-    
     ggplot(Twitch_global_data_per_year, aes(x=reorder(Game, -get(stats2)), y=get(stats2))) + geom_col(fill="#debb2f") +
-      labs(title = "YYYYYYYYY", x = "Game", y = stats2) +
-      theme(text = element_text(size = 14))
+      labs(title = "Top 5 games", x = "Game", y = stats2) 
     
-    
-    # ggplot(Twitch_global_data_per_year, aes_string(x="Game", y=stats)) + geom_col(fill="#debb2f") + 
-    #   labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Wojew?dztwo", y = "Powierzchnia [ha]")
     
     
   })
@@ -309,7 +273,7 @@ server <- function(input, output) {
     ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=hours_watched_sum)) + 
       geom_line(aes(group=1), color="#debb2f", size=1.5) +
       geom_point(shape=21, fill="#debb2f", size=5) +
-      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x ="Year", y = "1")
+      labs(title = "Sum of hours watched in each year", x ="Year", y = "Hours watched")
   })
   
   output$distPlot3_2 <- renderPlot({
@@ -322,7 +286,7 @@ server <- function(input, output) {
     ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=hours_streamed_sum)) + 
       geom_line(aes(group=1), color="#debb2f", size=1.5) +
       geom_point(shape=21, fill="#debb2f", size=5) +
-      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Year", y = "2d")
+      labs(title = "Sum of hours streamed in each year", x = "Year", y = "Hours streamed")
   })
   
   output$distPlot3_3 <- renderPlot({
@@ -335,7 +299,7 @@ server <- function(input, output) {
     ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=peak_viewers_max)) + 
       geom_line(aes(group=1), color="#debb2f", size=1.5) +
       geom_point(shape=21, fill="#debb2f", size=5) +
-      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Year", y = "3")
+      labs(title = "Peak number of viewers in each year", x = "Year", y = "Peak number of viewers")
   })
   
   
@@ -349,7 +313,7 @@ server <- function(input, output) {
     ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=peak_channels_max)) + 
       geom_line(aes(group=1), color="#debb2f", size=1.5) +
       geom_point(shape=21, fill="#debb2f", size=5) +
-      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Year", y = "4")
+      labs(title = "Peak number of channels in each year", x = "Year", y = "Peak number of channels")
   })
   
   output$distPlot3_5 <- renderPlot({
@@ -363,7 +327,7 @@ server <- function(input, output) {
     ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=streamers_sum)) +
       geom_line(aes(group=1), color="#debb2f", size=1.5) +
       geom_point(shape=21, fill="#debb2f", size=5) +
-      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Year", y = "5")
+      labs(title = "Sum of number of streamers in each year", x = "Year", y = "Number of streamers")
   }) 
   
   output$distPlot3_6 <- renderPlot({
@@ -377,7 +341,7 @@ server <- function(input, output) {
     ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=avg_viewers_sum)) + 
       geom_line(aes(group=1), color="#debb2f", size=1.5) +
       geom_point(shape=21, fill="#debb2f", size=5) +
-      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Year", y = "6")
+      labs(title = "Average number of viewers in each year", x = "Year", y = "Average number of viewers")
   }) 
   
   
@@ -392,7 +356,7 @@ server <- function(input, output) {
     ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=avg_channels_sum)) + 
       geom_line(aes(group=1), color="#debb2f", size=1.5) +
       geom_point(shape=21, fill="#debb2f", size=5) +
-      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Year", y = "7")
+      labs(title = "Average number of channels in each year", x = "Year", y = "Average number of channels")
   })
   
   output$distPlot3_8 <- renderPlot({
@@ -406,7 +370,7 @@ server <- function(input, output) {
     ggplot(Twitch_game_yearly_data, aes(x=reorder(Year, Year), y=avg_viewer_ratio_sum)) + 
       geom_line(aes(group=1), color="#debb2f", size=1.5) +
       geom_point(shape=21, fill="#debb2f", size=5) +
-      labs(title = "Sumaryczna powierzchnia grunt?w w poszczeg?lnych wojew?dztwach", x = "Year", y = "8")
+      labs(title = "Average viewer ratio in each year", x = "Year", y = "Average viewer ratio")
   })
   
   
@@ -416,15 +380,16 @@ server <- function(input, output) {
     year4 <- input$year4
 
     twitch_cloud <- twitch_cloud %>% subset(Year == year4) %>% arrange(-hours_watched_sum) %>% head(30)
-    View(twitch_cloud)
+    # View(twitch_cloud)
     mycloud(words = twitch_cloud$Game, freq = twitch_cloud$hours_watched_sum, colors=brewer.pal(8, "Dark2"))
-    #mycloud(words = Twitch_game_yearly_4$Game, freq = get(stats4), colors=brewer.pal(8, "Dark2"))
-    
-    #wordcloud(words = Twitch_game_yearly_4$Game, freq = Twitch_game_yearly_4$hours_watched_sum, colors=brewer.pal(8, "Dark2"))
     
     
     
   })
+ 
+  
+  
+  
   
   
   
